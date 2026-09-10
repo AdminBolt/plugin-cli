@@ -1,0 +1,46 @@
+{
+    "$schema": "https://raw.githubusercontent.com/AdminBolt/plugin-sdk/main/schema/plugin.schema.json",
+    "id": "{{id}}",
+    "name": "{{name}}",
+    "version": "0.1.0",
+    "description": "{{description}}",
+    "author": {
+        "name": "{{author}}"
+    },
+    "license": "MIT",
+    "sdk": "^1.0",
+    "panel": ">=1.9.0",
+    "runtime": {
+        "php": "^8.2",
+        "entrypoint": "public/index.php",
+        "transport": "http"
+    },
+    "api": {
+        "scopes": [
+            "client:domains:read"
+        ]
+    },
+    "hooks": [
+        {
+            "event": "before_domain_creation",
+            "blocking": true,
+            "timeout": 5,
+            "on_failure": "open"
+        },
+        "after_domain_creation"
+    ],
+    "settings": [
+        {
+            "key": "log_level",
+            "type": "select",
+            "label": "Log level",
+            "default": "info",
+            "options": {
+                "debug": "Debug",
+                "info": "Info",
+                "warning": "Warning",
+                "error": "Error"
+            }
+        }
+    ]
+}

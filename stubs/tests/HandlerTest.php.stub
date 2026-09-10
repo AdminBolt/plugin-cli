@@ -1,0 +1,60 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Tests;
+
+use {{namespace}}\Handler\ExampleHandler;
+use AdminBolt\Plugin\Config;
+use AdminBolt\Plugin\Hook\Hook;
+use AdminBolt\Plugin\Hook\HookRequest;
+use AdminBolt\Plugin\Manifest;
+use AdminBolt\Plugin\Plugin;
+use PHPUnit\Framework\TestCase;
+
+final class HandlerTest extends TestCase
+{
+    private function plugin(): Plugin
+    {
+        return Plugin::create(
+            Manifest::fromFile(__DIR__ . '/../plugin.json'),
+            Config::fromArray([
+                'panel' => ['url' => 'https://panel.test:2087'],
+                'plugin' => ['id' => '{{id}}'],
+                'api' => ['key' => 'k', 'secret' => 's'],
+                'hooks' => ['secret' => 'test'],
+            ], 'test'),
+        );
+    }
+
+    /**
+     * Worth keeping: a manifest that fails validation cannot be installed,
+     * and CI is a better place to find that out than a customer's server.
+     */
+    public function test_the_shipped_manifest_is_valid(): void
+    {
+        self::assertSame([], Manifest::validate(
+            json_decode((string) file_get_contents(__DIR__ . '/../plugin.json'), true, 512, JSON_THROW_ON_ERROR)
+        ));
+    }
+
+    public function test_it_refuses_an_invalid_domain(): void
+    {
+        $response = (new ExampleHandler($this->plugin()))->handle(HookRequest::fromArray([
+            'hook' => Hook::BEFORE_DOMAIN_CREATION,
+            'payload' => ['domain' => 'example.invalid'],
+        ]));
+
+        self::assertTrue($response->isRejection());
+    }
+
+    public function test_it_allows_a_normal_domain(): void
+    {
+        $response = (new ExampleHandler($this->plugin()))->handle(HookRequest::fromArray([
+            'hook' => Hook::BEFORE_DOMAIN_CREATION,
+            'payload' => ['domain' => 'example.com'],
+        ]));
+
+        self::assertFalse($response->isRejection());
+    }
+}

@@ -1,0 +1,71 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Handler;
+
+use AdminBolt\Plugin\Hook\Hook;
+use AdminBolt\Plugin\Hook\HookHandler;
+use AdminBolt\Plugin\Hook\HookRequest;
+use AdminBolt\Plugin\Hook\HookResponse;
+use AdminBolt\Plugin\Plugin;
+
+final class ExampleHandler implements HookHandler
+{
+    public function __construct(private readonly Plugin $plugin)
+    {
+    }
+
+    public function hooks(): array
+    {
+        return [
+            Hook::BEFORE_DOMAIN_CREATION,
+            Hook::AFTER_DOMAIN_CREATION,
+        ];
+    }
+
+    public function handle(HookRequest $request): HookResponse
+    {
+        return match ($request->hook) {
+            Hook::BEFORE_DOMAIN_CREATION => $this->beforeCreation($request),
+            Hook::AFTER_DOMAIN_CREATION => $this->afterCreation($request),
+            default => HookResponse::ok(),
+        };
+    }
+
+    /**
+     * Runs inside the creation, while the panel holds the customer's request.
+     * Keep it fast and free of remote calls: a slow blocking handler is a slow
+     * domain creation.
+     */
+    private function beforeCreation(HookRequest $request): HookResponse
+    {
+        $domain = (string) $request->payload('domain');
+
+        if (str_ends_with($domain, '.invalid')) {
+            // The message is shown to whoever tried to create the domain,
+            // so write it for them.
+            return HookResponse::reject(sprintf('%s cannot be hosted here.', $domain));
+        }
+
+        return HookResponse::ok();
+    }
+
+    /**
+     * Runs after the domain exists. Nothing to veto, so this is where the
+     * real work goes: it is queued and retried.
+     */
+    private function afterCreation(HookRequest $request): HookResponse
+    {
+        $this->plugin->logger()->info('A domain was created', [
+            'domain' => $request->payload('domain'),
+            'account' => $request->hostingAccountUsername(),
+        ]);
+
+        // Scoped to the account the hook came from, so this plugin cannot
+        // touch anyone else's data even by accident.
+        // $this->plugin->clientFor($request)->dnsRecords()->createRecord(...);
+
+        return HookResponse::ok();
+    }
+}

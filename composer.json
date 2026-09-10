@@ -1,0 +1,43 @@
+{
+    "name": "adminbolt/plugin-cli",
+    "description": "Scaffold, validate, test and package AdminBolt panel plugins",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "adminbolt",
+        "plugin",
+        "cli",
+        "scaffold"
+    ],
+    "homepage": "https://github.com/AdminBolt/plugin-cli",
+    "require": {
+        "php": "^8.2",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "adminbolt/plugin-sdk": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "bin": [
+        "bin/bolt-plugin"
+    ],
+    "autoload": {
+        "psr-4": {
+            "AdminBolt\\PluginCli\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "AdminBolt\\PluginCli\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit"
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

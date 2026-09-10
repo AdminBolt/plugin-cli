@@ -1,0 +1,48 @@
+# {{name}}
+
+{{description}}
+
+An AdminBolt panel plugin. It runs outside the panel, in its own process, and
+ships on its own schedule.
+
+## Develop
+
+```bash
+composer install
+```
+
+Create `runtime.json` next to `plugin.json`. The panel writes this at install
+time; for development you write it yourself. It is gitignored.
+
+```json
+{
+    "panel": { "url": "https://panel.example:2087" },
+    "plugin": { "id": "{{id}}" },
+    "api": { "key": "your-api-key", "secret": "your-api-secret" },
+    "hooks": { "secret": "any-value-for-local-testing" },
+    "settings": { "log_level": "debug" },
+    "paths": { "data": "var/data", "logs": "var/logs" }
+}
+```
+
+Run it, then send it a hook:
+
+```bash
+BOLT_PLUGIN_DIR="$PWD" php -S 127.0.0.1:8731 -t public public/index.php
+
+bolt-plugin hook before_domain_creation --payload='{"domain":"example.invalid"}'
+```
+
+## Check and ship
+
+```bash
+composer test
+bolt-plugin validate
+bolt-plugin package
+```
+
+## Documentation
+
+- [Plugin structure](https://github.com/AdminBolt/plugin-sdk/blob/main/docs/plugin-structure.md)
+- [Hooks](https://github.com/AdminBolt/plugin-sdk/blob/main/docs/hooks.md)
+- [Calling the panel API](https://github.com/AdminBolt/plugin-sdk/blob/main/docs/api.md)

@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.2', '8.3', '8.4']
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: curl, json
+          coverage: none
+
+      - run: composer install --prefer-dist --no-progress
+
+      - run: composer test
+
+      # The scaffold has to produce something that installs and runs, so build
+      # one and put it through its own paces.
+      - name: Scaffold a plugin and validate it
+        run: |
+          ./bin/bolt-plugin new ci-smoke --vendor=acme
+          ./bin/bolt-plugin validate --path=ci-smoke
