@@ -114,6 +114,32 @@ final class ValidateCommand extends Command
             $output->bullet($scope);
         }
 
+        if ($manifest->commands() !== []) {
+            // The highest-consequence lines in a manifest, and the ones an
+            // administrator will read on the approval screen. Printing them
+            // here is the last chance to notice that one of them is not what
+            // was meant.
+            $output->heading('Commands it may run in an account');
+
+            foreach ($manifest->commands() as $command) {
+                $steps = $command['steps'] ?? [['program' => $command['program'] ?? '?', 'args' => $command['args'] ?? []]];
+
+                $output->bullet(sprintf(
+                    '%s%s',
+                    (string) ($command['name'] ?? '?'),
+                    ($command['async'] ?? false) ? '  (in the background)' : ''
+                ));
+
+                foreach ($steps as $step) {
+                    $output->line(sprintf(
+                        '      %s %s',
+                        (string) ($step['program'] ?? '?'),
+                        implode(' ', array_map('strval', (array) ($step['args'] ?? [])))
+                    ));
+                }
+            }
+        }
+
         if ($warnings !== []) {
             $output->heading('Warnings');
 
