@@ -9,6 +9,7 @@
 declare(strict_types=1);
 
 use {{namespace}}\Handler\ExampleHandler;
+use {{namespace}}\Ui\ExamplePage;
 use AdminBolt\Plugin\Plugin;
 
 require __DIR__ . '/../vendor/autoload.php';
@@ -16,5 +17,12 @@ require __DIR__ . '/../vendor/autoload.php';
 $plugin = Plugin::boot(__DIR__);
 
 $plugin->register(new ExampleHandler($plugin));
+
+// The page declared under "ui" in plugin.json. The slug here must match the
+// slug there: the manifest puts it in the navigation, this fills it in.
+$page = new ExamplePage($plugin);
+
+$plugin->page('{{id}}', $page->render(...));
+$plugin->action('refresh', $page->refresh(...));
 
 $plugin->run();

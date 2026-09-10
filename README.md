@@ -35,6 +35,8 @@ the panel accepts. It also reports the things that are legal but will bite:
 - an entrypoint the manifest names but that does not exist
 - notification hooks with no API scopes, so the plugin cannot act on what it is
   told about
+- panel pages with no API scopes, so a page has nothing it can read to show
+- an iframe page that names no path for the panel to proxy
 - a blocking hook subscribed but not marked blocking, so its answer is
   ignored and it can refuse nothing
 - a blocking timeout long enough that a customer notices
@@ -80,6 +82,39 @@ bolt-plugin hook domain.created --payload='{"id":42}' | jq .status
 | `--secret` | read from `runtime.json` |
 | `--actor` | `admin` |
 | `--timestamp` | now, for testing the replay window |
+
+## Render a page
+
+```bash
+bolt-plugin page zones --account=acme
+```
+
+```
+info  POST http://127.0.0.1:8731/ui/zones
+  ok   Cloudflare
+  Zones mirrored for this account
+  - Zones: 12
+  - Pending: 1
+  [ Sync now ]  -> sync
+
+Table (12 rows)
+  Domain  |  Status  |  Last sync
+  example.com  |  live  |  2026-09-10T09:12:00+00:00
+```
+
+It prints the shape of the page rather than raw JSON, so you can see what the
+panel would draw. The viewer envelope is signed the same way the panel signs
+it, so what the plugin accepts here is what it will accept in the panel.
+
+Run one of the page's actions with `--action`, and give it the values a button
+or a form would have carried:
+
+```bash
+bolt-plugin page zones --action=purge --arguments='{"key":"example.com"}'
+bolt-plugin page zones --action=save --input='{"api_token":"cf_live_x"}'
+```
+
+Use `--panel=admin` for an admin page, where there is no account in scope.
 
 ## Probe a plugin
 

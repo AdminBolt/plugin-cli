@@ -89,7 +89,7 @@ final class ScaffoldTest extends TestCase
     {
         $this->scaffold(['wave-dns']);
 
-        foreach (['public/index.php', 'src/Handler/ExampleHandler.php', 'tests/HandlerTest.php'] as $file) {
+        foreach (['public/index.php', 'src/Handler/ExampleHandler.php', 'src/Ui/ExamplePage.php', 'tests/HandlerTest.php'] as $file) {
             exec(sprintf('php -l %s 2>&1', escapeshellarg($this->directory . '/' . $file)), $out, $status);
 
             self::assertSame(0, $status, $file . ' has a syntax error: ' . implode("\n", $out));
@@ -106,6 +106,21 @@ final class ScaffoldTest extends TestCase
         );
 
         self::assertSame(0, $exit);
+    }
+
+    /**
+     * The page slug in the manifest and the slug the entrypoint registers
+     * have to agree, or the navigation entry opens onto nothing.
+     */
+    public function test_the_scaffolded_page_slug_matches_the_manifest(): void
+    {
+        $this->scaffold(['wave-dns']);
+
+        $manifest = json_decode((string) file_get_contents($this->directory . '/plugin.json'), true, 512, JSON_THROW_ON_ERROR);
+        $entrypoint = (string) file_get_contents($this->directory . '/public/index.php');
+
+        self::assertSame('wave-dns', $manifest['ui'][0]['slug']);
+        self::assertStringContainsString("\$plugin->page('wave-dns'", $entrypoint);
     }
 
     public function test_the_secret_bearing_runtime_file_is_gitignored(): void

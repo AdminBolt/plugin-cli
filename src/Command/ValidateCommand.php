@@ -90,6 +90,20 @@ final class ValidateCommand extends Command
             ));
         }
 
+        if ($manifest->ui() !== []) {
+            $output->heading('Pages');
+
+            foreach ($manifest->ui() as $page) {
+                $output->bullet(sprintf(
+                    '%-14s %s panel%s%s',
+                    $page['slug'],
+                    $page['panel'],
+                    $page['group'] !== null ? '  under ' . $page['group'] : '',
+                    $page['render'] === 'iframe' ? '  (iframe)' : ''
+                ));
+            }
+        }
+
         $output->heading('API scopes');
 
         if ($manifest->scopes() === []) {
@@ -152,6 +166,22 @@ final class ValidateCommand extends Command
 
         if ($manifest->get('panel') === null && $manifest->hookNames() !== []) {
             $warnings[] = 'No "panel" constraint. If a hook you use was added in a later release, the install will succeed and the hook will silently never fire.';
+        }
+
+        foreach ($manifest->ui() as $page) {
+            if ($page['render'] !== 'iframe') {
+                continue;
+            }
+
+            if ($page['path'] === null) {
+                $warnings[] = sprintf('Page "%s" renders as an iframe but names no path for the panel to proxy.', $page['slug']);
+            }
+        }
+
+        // A page that cannot read anything shows an empty screen, which looks
+        // like a broken plugin rather than a missing scope.
+        if ($manifest->ui() !== [] && $manifest->scopes() === []) {
+            $warnings[] = 'The plugin has panel pages but declares no api.scopes, so a page cannot read anything to show.';
         }
 
         $gitignore = $directory . '/.gitignore';

@@ -10,6 +10,7 @@ use AdminBolt\PluginCli\Command\HealthCommand;
 use AdminBolt\PluginCli\Command\HookCommand;
 use AdminBolt\PluginCli\Command\HooksCommand;
 use AdminBolt\PluginCli\Command\NewCommand;
+use AdminBolt\PluginCli\Command\PageCommand;
 use AdminBolt\PluginCli\Command\PackageCommand;
 use AdminBolt\PluginCli\Command\ValidateCommand;
 use AdminBolt\PluginCli\Console\Input;
@@ -25,6 +26,7 @@ final class Application
         ValidateCommand::class,
         HookCommand::class,
         HooksCommand::class,
+        PageCommand::class,
         HealthCommand::class,
         PackageCommand::class,
     ];
@@ -92,6 +94,7 @@ final class Application
         $this->output->line('  bolt-plugin new cloudflare-dns --vendor=acme');
         $this->output->line('  bolt-plugin validate');
         $this->output->line('  bolt-plugin hook domain.creating --payload=\'{"domain":"example.test"}\'');
+        $this->output->line('  bolt-plugin page zones --account=acme');
         $this->output->line('  bolt-plugin health --url=http://127.0.0.1:8731');
         $this->output->line('  bolt-plugin package');
         $this->output->line();

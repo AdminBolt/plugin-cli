@@ -81,6 +81,7 @@ final class NewCommand extends Command
             'gitignore.stub' => '.gitignore',
             'public/index.php.stub' => 'public/index.php',
             'src/Handler/ExampleHandler.php.stub' => 'src/Handler/ExampleHandler.php',
+            'src/Ui/ExamplePage.php.stub' => 'src/Ui/ExamplePage.php',
             'tests/HandlerTest.php.stub' => 'tests/HandlerTest.php',
         ];
 

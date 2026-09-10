@@ -1,0 +1,60 @@
+<?php
+
+declare(strict_types=1);
+
+namespace {{namespace}}\Ui;
+
+use AdminBolt\Plugin\Plugin;
+use AdminBolt\Plugin\Ui\Action;
+use AdminBolt\Plugin\Ui\Column;
+use AdminBolt\Plugin\Ui\Page;
+use AdminBolt\Plugin\Ui\Stat;
+use AdminBolt\Plugin\Ui\Table;
+use AdminBolt\Plugin\Ui\UiRequest;
+use AdminBolt\Plugin\Ui\UiResponse;
+
+/**
+ * The plugin's page in the client area.
+ *
+ * It describes what to show and the panel draws it with its own components,
+ * so the page matches the rest of the panel, follows the operator's theme and
+ * works on a phone. There is no HTML here.
+ */
+final class ExamplePage
+{
+    public function __construct(private readonly Plugin $plugin)
+    {
+    }
+
+    public function render(UiRequest $request): Page
+    {
+        // clientFor() scopes the call to the account the page is being viewed
+        // for. That identity comes from the panel's signed envelope, so it is
+        // the safe thing to read; never take an account from a form field or
+        // a query parameter.
+        $domains = $this->plugin->clientFor($request)->domains()->all();
+
+        return Page::make('{{name}}')
+            ->subheading('Domains on this account')
+            ->stats(Stat::make('Domains', count($domains))->icon('heroicon-o-globe-alt'))
+            ->headerActions(Action::make('refresh', 'Refresh')->primary())
+            ->add(
+                Table::make()
+                    ->columns(
+                        Column::make('domain', 'Domain'),
+                        Column::make('created_at', 'Added')->dateTime(),
+                    )
+                    ->rows(array_map(static fn (array $domain): array => [
+                        'domain' => $domain['domain'] ?? '',
+                        'created_at' => $domain['created_at'] ?? null,
+                    ], array_filter($domains, 'is_array')))
+                    ->keyedBy('domain')
+                    ->emptyState('This account has no domains yet.'),
+            );
+    }
+
+    public function refresh(UiRequest $request): UiResponse
+    {
+        return UiResponse::notify('Refreshed.');
+    }
+}

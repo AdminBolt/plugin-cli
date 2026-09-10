@@ -42,5 +42,14 @@
                 "error": "Error"
             }
         }
+    ],
+    "ui": [
+        {
+            "panel": "client",
+            "slug": "{{id}}",
+            "title": "{{name}}",
+            "icon": "heroicon-o-puzzle-piece",
+            "render": "declarative"
+        }
     ]
 }
