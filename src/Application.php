@@ -91,7 +91,7 @@ final class Application
         $this->output->heading('Examples');
         $this->output->line('  bolt-plugin new cloudflare-dns --vendor=acme');
         $this->output->line('  bolt-plugin validate');
-        $this->output->line('  bolt-plugin hook before_domain_creation --payload=\'{"domain":"example.test"}\'');
+        $this->output->line('  bolt-plugin hook domain.creating --payload=\'{"domain":"example.test"}\'');
         $this->output->line('  bolt-plugin health --url=http://127.0.0.1:8731');
         $this->output->line('  bolt-plugin package');
         $this->output->line();

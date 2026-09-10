@@ -41,7 +41,7 @@ final class HookCommand extends Command
         $hook = $input->argument(0);
 
         if ($hook === null) {
-            $output->failure('Which hook? For example: bolt-plugin hook before_domain_creation');
+            $output->failure('Which hook? For example: bolt-plugin hook domain.creating');
             $output->dim('  Run "bolt-plugin hooks" for the catalogue.');
 
             return self::FAILURE;

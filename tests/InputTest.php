@@ -11,9 +11,9 @@ final class InputTest extends TestCase
 {
     public function test_it_reads_arguments_and_equals_options(): void
     {
-        $input = new Input(['before_domain_creation', '--payload={"domain":"a.com"}', '--verbose']);
+        $input = new Input(['domain.creating', '--payload={"domain":"a.com"}', '--verbose']);
 
-        self::assertSame('before_domain_creation', $input->argument(0));
+        self::assertSame('domain.creating', $input->argument(0));
         self::assertSame('{"domain":"a.com"}', $input->option('payload'));
         self::assertTrue($input->flag('verbose'));
     }

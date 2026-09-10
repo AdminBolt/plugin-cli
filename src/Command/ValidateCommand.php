@@ -128,15 +128,16 @@ final class ValidateCommand extends Command
             $warnings[] = 'No composer.json, so the SDK will not be installed on the target server.';
         }
 
-        // A plugin that writes but never reads is usually a missing scope,
-        // and a plugin with no scopes at all cannot reach the panel.
-        $needsApi = array_filter(
+        // A plugin that is told about things but has no way to act is usually
+        // a forgotten scope, and one with no scopes at all cannot reach the
+        // panel at all.
+        $notifications = array_filter(
             $manifest->hookNames(),
-            static fn (string $hook): bool => str_starts_with($hook, 'after_')
+            static fn (string $hook): bool => !Hook::isBlockable($hook) && !Hook::isLifecycle($hook)
         );
 
-        if ($needsApi !== [] && $manifest->scopes() === []) {
-            $warnings[] = 'The plugin subscribes to after_* hooks but declares no api.scopes, so it cannot act on what it is told about.';
+        if ($notifications !== [] && $manifest->scopes() === []) {
+            $warnings[] = 'The plugin subscribes to notification hooks but declares no api.scopes, so it cannot act on what it is told about.';
         }
 
         foreach ($manifest->hooks() as $hook) {
@@ -167,17 +168,25 @@ final class ValidateCommand extends Command
             }
         }
 
-        foreach (Hook::before() as $blockable) {
-            if ($manifest->subscribesTo($blockable)) {
-                $declared = array_filter($manifest->hooks(), static fn (array $h): bool => $h['event'] === $blockable);
-                $first = reset($declared);
+        foreach ($manifest->hooks() as $hook) {
+            if (Hook::isBlockable($hook['event']) && !$hook['blocking']) {
+                $warnings[] = sprintf(
+                    '%s can run inside the operation, but is not marked blocking, so its answer is ignored and it cannot refuse anything.',
+                    $hook['event']
+                );
+            }
 
-                if ($first !== false && !$first['blocking']) {
-                    $warnings[] = sprintf(
-                        '%s is subscribed but not marked blocking, so its answer is ignored and it cannot refuse anything.',
-                        $blockable
-                    );
-                }
+            // The mistake this naming invites: subscribing to the past tense
+            // when you meant the present one. It validates cleanly and the
+            // plugin silently cannot veto, which is hard to debug later.
+            $twin = Hook::blockableTwin($hook['event']);
+
+            if ($twin !== null && !$manifest->subscribesTo($twin)) {
+                $warnings[] = sprintf(
+                    '%s fires after the operation has already succeeded, so it cannot refuse anything. If you meant to stop it, subscribe to %s instead.',
+                    $hook['event'],
+                    $twin
+                );
             }
         }
 

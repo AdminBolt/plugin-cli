@@ -19,16 +19,16 @@ final class ExampleHandler implements HookHandler
     public function hooks(): array
     {
         return [
-            Hook::BEFORE_DOMAIN_CREATION,
-            Hook::AFTER_DOMAIN_CREATION,
+            Hook::DOMAIN_CREATING,
+            Hook::DOMAIN_CREATED,
         ];
     }
 
     public function handle(HookRequest $request): HookResponse
     {
         return match ($request->hook) {
-            Hook::BEFORE_DOMAIN_CREATION => $this->beforeCreation($request),
-            Hook::AFTER_DOMAIN_CREATION => $this->afterCreation($request),
+            Hook::DOMAIN_CREATING => $this->beforeCreation($request),
+            Hook::DOMAIN_CREATED => $this->afterCreation($request),
             default => HookResponse::ok(),
         };
     }

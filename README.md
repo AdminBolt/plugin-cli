@@ -33,9 +33,9 @@ Runs the SDK's own manifest validation, so what passes here is exactly what
 the panel accepts. It also reports the things that are legal but will bite:
 
 - an entrypoint the manifest names but that does not exist
-- `after_*` hooks with no API scopes, so the plugin cannot act on what it is
+- notification hooks with no API scopes, so the plugin cannot act on what it is
   told about
-- a `before_*` hook subscribed but not marked blocking, so its answer is
+- a blocking hook subscribed but not marked blocking, so its answer is
   ignored and it can refuse nothing
 - a blocking timeout long enough that a customer notices
 - no `panel` version constraint, so a hook added in a later release silently
@@ -49,11 +49,11 @@ Worth having in CI.
 ```bash
 BOLT_PLUGIN_DIR="$PWD" php -S 127.0.0.1:8731 -t public public/index.php &
 
-bolt-plugin hook before_domain_creation --payload='{"domain":"example.test"}'
+bolt-plugin hook domain.creating --payload='{"domain":"example.test"}'
 ```
 
 ```
-info  POST http://127.0.0.1:8731/  before_domain_creation
+info  POST http://127.0.0.1:8731/  domain.creating
 {
     "status": "reject",
     "message": "example.test cannot be hosted here."
@@ -69,7 +69,7 @@ this tool produces is one the panel would produce. The secret is read from
 The decision goes to stdout and everything else to stderr, so it pipes:
 
 ```bash
-bolt-plugin hook after_domain_creation --payload='{"id":42}' | jq .status
+bolt-plugin hook domain.created --payload='{"id":42}' | jq .status
 ```
 
 | Option | Default |

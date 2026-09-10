@@ -30,7 +30,7 @@ Run it, then send it a hook:
 ```bash
 BOLT_PLUGIN_DIR="$PWD" php -S 127.0.0.1:8731 -t public public/index.php
 
-bolt-plugin hook before_domain_creation --payload='{"domain":"example.invalid"}'
+bolt-plugin hook domain.creating --payload='{"domain":"example.invalid"}'
 ```
 
 ## Check and ship

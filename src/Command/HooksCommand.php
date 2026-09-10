@@ -27,10 +27,11 @@ final class HooksCommand extends Command
     public function run(Input $input, Output $output): int
     {
         $output->heading('Blocking hooks');
-        $output->dim('  Run inside the operation. Can refuse it, or change an allow-listed input.');
+        $output->dim('  Present participle. Run inside the operation, and can refuse it or');
+        $output->dim('  change an allow-listed input.');
         $output->line();
 
-        foreach (Hook::before() as $hook) {
+        foreach (Hook::blockable() as $hook) {
             $mutable = Hook::mutableKeys($hook);
 
             $output->bullet($mutable === []
@@ -38,18 +39,29 @@ final class HooksCommand extends Command
                 : sprintf('%s  (can change: %s)', $hook, implode(', ', $mutable)));
         }
 
-        $output->heading('After hooks');
-        $output->dim('  Run once the operation succeeded. Queued and retried. Cannot change anything.');
+        $output->heading('Notification hooks');
+        $output->dim('  Past participle. Run once the operation succeeded. Queued and retried.');
+        $output->dim('  Cannot change anything.');
         $output->line();
 
-        foreach (Hook::after() as $hook) {
-            $output->bullet($hook);
+        // 17 of them, so group by resource rather than printing one flat list.
+        $grouped = [];
+
+        foreach (Hook::notifications() as $hook) {
+            $grouped[Hook::resource($hook)][] = $hook;
+        }
+
+        foreach ($grouped as $resource => $hooks) {
+            $output->bullet(sprintf('%-14s %s', $resource, implode('  ', array_map(
+                static fn (string $hook): string => substr($hook, strlen($resource) + 1),
+                $hooks
+            ))));
         }
 
         $output->heading('Plugin lifecycle');
         $output->line();
 
-        foreach ([Hook::PLUGIN_INSTALLED, Hook::PLUGIN_SETTINGS_UPDATED, Hook::PLUGIN_UNINSTALLED] as $hook) {
+        foreach (Hook::lifecycle() as $hook) {
             $output->bullet($hook);
         }
 
