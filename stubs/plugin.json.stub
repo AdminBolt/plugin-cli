@@ -10,6 +10,7 @@
     "license": "MIT",
     "sdk": "^1.0",
     "panel": ">=1.9.0",
+    "category": "other",
     "runtime": {
         "php": "^8.2",
         "entrypoint": "public/index.php",
